@@ -1,0 +1,10 @@
+---
+description: Follow repo AGENTS.md (brand, CRM, calculator, Prisma). Nested AGENTS.md apply by folder.
+alwaysApply: true
+---
+
+# Mr.GLOW agent context
+
+Read **`AGENTS.md`** at the repo root before non-trivial changes. Nested `AGENTS.md` also apply under `src/content`, `src/app/(site)`, `src/components/site`, `src/app/admin`, `src/app/api`, `src/lib`, `src/lib/calculator`, `prisma`.
+
+Legal name **Mr.GLOW RENEWABLES PVT LTD**; brand short **Mr.GLOW RENEWABLES**. Do not invent contact details, awards, OEM partnerships, or public statistics. Do not put calculator math in React. The lead profile is the source of truth for survey, design, pricing, and proposal.

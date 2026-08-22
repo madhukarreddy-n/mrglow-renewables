@@ -1,0 +1,16 @@
+import type { Metadata } from "next";
+import { getSettings } from "@/lib/settings";
+
+export const metadata: Metadata = { title: "Privacy Policy" };
+
+export default async function Page() {
+  const s = await getSettings();
+  return (
+    <article className="section">
+      <div className="container-wide max-w-3xl whitespace-pre-wrap text-muted">
+        <h1 className="font-display text-4xl text-navy">Privacy Policy</h1>
+        <p className="mt-8">{s.privacy}</p>
+      </div>
+    </article>
+  );
+}

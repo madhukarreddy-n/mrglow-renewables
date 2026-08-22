@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mrglow
+      POSTGRES_PASSWORD: mrglow
+      POSTGRES_DB: mrglow
+    ports:
+      - "5432:5432"
+    volumes:
+      - mrglow_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mrglow -d mrglow"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+volumes:
+  mrglow_pg:

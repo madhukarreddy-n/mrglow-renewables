@@ -1,0 +1,686 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  SALES_MANAGER
+  SALES_EXECUTIVE
+  SITE_SURVEYOR
+  INSTALLATION_MANAGER
+  SERVICE_MANAGER
+  FINANCE
+  VIEWER
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  SITE_SURVEY_PENDING
+  SITE_SURVEY_SCHEDULED
+  SITE_SURVEY_COMPLETED
+  PROPOSAL_SENT
+  NEGOTIATION
+  WON
+  LOST
+  ON_HOLD
+}
+
+enum CustomerCategory {
+  RESIDENTIAL
+  COMMERCIAL
+  INDUSTRIAL
+}
+
+enum LeadSource {
+  WEBSITE
+  SOLAR_CALCULATOR
+  DIRECT_CONSULTATION
+  WHATSAPP
+  REFERRAL
+  CAMPAIGN
+  OTHER
+}
+
+enum FollowUpType {
+  CALL
+  WHATSAPP
+  EMAIL
+  SITE_VISIT
+  MEETING
+  OTHER
+}
+
+enum FollowUpStatus {
+  OPEN
+  COMPLETED
+  CANCELLED
+}
+
+enum SurveyStatus {
+  PENDING
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum QuotationStatus {
+  DRAFT
+  SENT
+  VIEWED
+  NEGOTIATION
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+enum CustomerStatus {
+  ACTIVE
+  INSTALLATION
+  COMMISSIONED
+  SERVICE_DUE
+  AMC
+  INACTIVE
+}
+
+enum PlantStatus {
+  PLANNED
+  INSTALLATION
+  COMMISSIONED
+  ACTIVE
+  INACTIVE
+}
+
+enum ServiceType {
+  PANEL_CLEANING
+  PREVENTIVE_MAINTENANCE
+  INSPECTION
+  INVERTER_SERVICE
+  ELECTRICAL_SERVICE
+  BREAKDOWN
+  OTHER
+}
+
+enum ServiceStatus {
+  OPEN
+  ASSIGNED
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum AmcStatus {
+  ACTIVE
+  EXPIRED
+  PENDING_RENEWAL
+  CANCELLED
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+}
+
+model User {
+  id             String     @id @default(cuid())
+  email          String     @unique
+  name           String
+  passwordHash   String
+  role           Role       @default(VIEWER)
+  phone          String?
+  active         Boolean    @default(true)
+  lastLoginAt    DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  assignedLeads  Lead[]     @relation("AssignedLeads")
+  followUps      FollowUp[]
+  surveys        SiteSurvey[]
+  quotations     Quotation[] @relation("QuotationOwner")
+  serviceTickets ServiceRequest[] @relation("AssignedTechnician")
+  amcContracts   AmcContract[]
+  notifications  Notification[]
+  auditLogs      AuditLog[]
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+model CalculatorConfig {
+  id                 String    @id @default(cuid())
+  version            Int
+  name               String
+  stateCode          String?
+  category           CustomerCategory?
+  subsidyType        String?
+  systemCostPerKwp   Decimal   @db.Decimal(12, 2)
+  panelWattage       Int       @default(550)
+  peakSunHours       Decimal   @db.Decimal(6, 3)
+  generationFactor   Decimal   @db.Decimal(8, 4)
+  systemEfficiency   Decimal   @db.Decimal(6, 4)
+  roofAreaPerKwp     Decimal   @db.Decimal(8, 2)
+  annualDegradation  Decimal   @db.Decimal(6, 4)
+  tariffEscalation   Decimal   @db.Decimal(6, 4)
+  maintenancePct     Decimal   @db.Decimal(6, 4)
+  projectLifetime    Int       @default(30)
+  co2KgPerKwh        Decimal   @db.Decimal(8, 4)
+  treesPerTonCo2     Decimal   @db.Decimal(8, 4)
+  unitsPerKwMonth    Decimal?  @db.Decimal(10, 4)
+  extra              Json?
+  effectiveFrom      DateTime  @default(now())
+  effectiveTo        DateTime?
+  active             Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([stateCode, category, subsidyType, active])
+}
+
+model SubsidyConfig {
+  id              String            @id @default(cuid())
+  version         Int
+  name            String
+  stateCode       String?
+  category        CustomerCategory
+  subsidyType     String
+  slabs           Json
+  maxSubsidy      Decimal           @db.Decimal(12, 2)
+  notes           String?
+  effectiveFrom   DateTime          @default(now())
+  effectiveTo     DateTime?
+  active          Boolean           @default(true)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+}
+
+model SystemPricing {
+  id               String             @id @default(cuid())
+  version          Int
+  category         CustomerCategory
+  subsidyType      String?
+  costPerKwp       Decimal            @db.Decimal(12, 2)
+  effectiveFrom    DateTime           @default(now())
+  effectiveTo      DateTime?
+  active           Boolean            @default(true)
+  createdAt        DateTime           @default(now())
+}
+
+model CalculatorReport {
+  id                     String   @id @default(cuid())
+  reportNumber           String   @unique
+  shareToken             String   @unique
+  leadId                 String?
+  lead                   Lead?    @relation(fields: [leadId], references: [id])
+  inputData              Json
+  calculationParameters  Json
+  calculationVersion     Int
+  results                Json
+  createdAt              DateTime @default(now())
+}
+
+model Lead {
+  id                   String            @id @default(cuid())
+  leadNumber           String            @unique
+  name                 String
+  phone                String
+  email                String?
+  pincode              String?
+  state                String?
+  category             CustomerCategory  @default(RESIDENTIAL)
+  monthlyBill          Decimal?          @db.Decimal(12, 2)
+  monthlyBillRange     String?
+  monthlyUnits         Decimal?          @db.Decimal(12, 2)
+  electricityUnitCost  Decimal?          @db.Decimal(8, 4)
+  source               LeadSource        @default(WEBSITE)
+  status               LeadStatus        @default(NEW)
+  assignedToId         String?
+  assignedTo           User?             @relation("AssignedLeads", fields: [assignedToId], references: [id])
+  calculatorReportId   String?
+  preferredCallback    String?
+  message              String?
+  campaign             String?
+  referral             String?
+  score                Int               @default(0)
+  isDemo               Boolean           @default(false)
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  activities           LeadActivity[]
+  followUps            FollowUp[]
+  surveys              SiteSurvey[]
+  quotations           Quotation[]
+  documents            Document[]
+  calculatorReports    CalculatorReport[]
+  customer             Customer?
+  designs              LeadDesign[]
+  lineItems            LeadLineItem[]
+
+  @@index([status, createdAt])
+  @@index([phone])
+  @@index([assignedToId])
+}
+
+model LeadActivity {
+  id        String   @id @default(cuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  type      String
+  message   String
+  meta      Json?
+  userId    String?
+  createdAt DateTime @default(now())
+
+  @@index([leadId, createdAt])
+}
+
+model FollowUp {
+  id           String         @id @default(cuid())
+  leadId       String
+  lead         Lead           @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  assignedToId String?
+  assignedTo   User?          @relation(fields: [assignedToId], references: [id])
+  type         FollowUpType
+  dueAt        DateTime
+  status       FollowUpStatus @default(OPEN)
+  notes        String?
+  completedAt  DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([dueAt, status])
+}
+
+model SiteSurvey {
+  id                       String        @id @default(cuid())
+  surveyNumber             String        @unique
+  leadId                   String
+  lead                     Lead          @relation(fields: [leadId], references: [id])
+  surveyorId               String?
+  surveyor                 User?         @relation(fields: [surveyorId], references: [id])
+  address                  String?
+  scheduledDate            DateTime?
+  scheduledTime            String?
+  propertyType             String?
+  roofType                 String?
+  roofArea                 Decimal?      @db.Decimal(12, 2)
+  availableArea            Decimal?      @db.Decimal(12, 2)
+  orientation              String?
+  shading                  String?
+  electricityMeterDetails  String?
+  phase                    String?
+  currentLoad              String?
+  notes                    String?
+  recommendedCapacityKwp   Decimal?      @db.Decimal(10, 3)
+  structureType            String?
+  buildingFloors           String?
+  roofHeight               String?
+  sanctionedLoad           String?
+  importedFileKey          String?
+  importedRaw              Json?
+  status                   SurveyStatus  @default(PENDING)
+  createdAt                DateTime      @default(now())
+  updatedAt                DateTime      @updatedAt
+  photos                   SiteSurveyPhoto[]
+}
+
+model SiteSurveyPhoto {
+  id        String     @id @default(cuid())
+  surveyId  String
+  survey    SiteSurvey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  fileKey   String
+  caption   String?
+  createdAt DateTime   @default(now())
+}
+
+model LeadDesign {
+  id                 String   @id @default(cuid())
+  leadId             String
+  lead               Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  fileKey            String
+  fileName           String
+  caption            String?
+  sortOrder          Int      @default(0)
+  includeInProposal  Boolean  @default(true)
+  createdAt          DateTime @default(now())
+
+  @@index([leadId, sortOrder])
+}
+
+model LeadLineItem {
+  id                 String   @id @default(cuid())
+  leadId             String
+  lead               Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  description        String
+  quantity           Decimal  @db.Decimal(12, 2)
+  unit               String   @default("nos")
+  unitPrice          Decimal  @db.Decimal(12, 2)
+  amount             Decimal  @db.Decimal(14, 2)
+  includeInProposal  Boolean  @default(true)
+  sortOrder          Int      @default(0)
+  createdAt          DateTime @default(now())
+}
+
+model ShowcaseBrand {
+  id         String   @id @default(cuid())
+  name       String
+  category   String
+  highlight  String?
+  logoKey    String?
+  published  Boolean  @default(false)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+}
+
+model Quotation {
+  id              String          @id @default(cuid())
+  quotationNumber String          @unique
+  leadId          String
+  lead            Lead            @relation(fields: [leadId], references: [id])
+  ownerId         String?
+  owner           User?           @relation("QuotationOwner", fields: [ownerId], references: [id])
+  systemCapacity  Decimal         @db.Decimal(10, 3)
+  panelWattage    Int?
+  inverter        String?
+  mounting        String?
+  warranty        String?
+  terms           String?
+  validityDate    DateTime?
+  grossCost       Decimal         @db.Decimal(14, 2)
+  subsidy         Decimal         @db.Decimal(14, 2) @default(0)
+  discount        Decimal         @db.Decimal(14, 2) @default(0)
+  netCost         Decimal         @db.Decimal(14, 2)
+  status          QuotationStatus @default(DRAFT)
+  version         Int             @default(1)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  items           QuotationItem[]
+  versions        QuotationVersion[]
+  customer        Customer?
+}
+
+model QuotationItem {
+  id           String    @id @default(cuid())
+  quotationId  String
+  quotation    Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  description  String
+  quantity     Decimal   @db.Decimal(12, 2)
+  unit         String
+  unitPrice    Decimal   @db.Decimal(12, 2)
+  amount       Decimal   @db.Decimal(14, 2)
+}
+
+model QuotationVersion {
+  id           String    @id @default(cuid())
+  quotationId  String
+  quotation    Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  version      Int
+  snapshot     Json
+  createdAt    DateTime  @default(now())
+}
+
+model Customer {
+  id               String          @id @default(cuid())
+  customerNumber   String          @unique
+  leadId           String?         @unique
+  lead             Lead?           @relation(fields: [leadId], references: [id])
+  quotationId      String?         @unique
+  quotation        Quotation?      @relation(fields: [quotationId], references: [id])
+  name             String
+  phone            String
+  email            String?
+  address          String?
+  state            String?
+  pincode          String?
+  category         CustomerCategory
+  installationDate DateTime?
+  status           CustomerStatus  @default(ACTIVE)
+  isDemo           Boolean         @default(false)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  plants           SolarPlant[]
+  documents        Document[]
+  serviceRequests  ServiceRequest[]
+  amcContracts     AmcContract[]
+  warranties       Warranty[]
+}
+
+model SolarPlant {
+  id                        String      @id @default(cuid())
+  plantId                   String      @unique
+  customerId                String
+  customer                  Customer    @relation(fields: [customerId], references: [id])
+  capacityKwp               Decimal     @db.Decimal(12, 3)
+  installationDate          DateTime?
+  commissioningDate         DateTime?
+  panelCount                Int?
+  panelWattage              Int?
+  inverterCapacity          Decimal?    @db.Decimal(12, 3)
+  expectedMonthlyGeneration Decimal?    @db.Decimal(14, 2)
+  expectedAnnualGeneration  Decimal?    @db.Decimal(14, 2)
+  location                  String?
+  monitoringStatus          String?
+  inverterInfo              String?
+  warrantyInfo              String?
+  status                    PlantStatus @default(PLANNED)
+  monitoringProvider        String?
+  externalPlantId           String?
+  externalDeviceId          String?
+  apiStatus                 String?
+  lastSyncAt                DateTime?
+  isDemo                    Boolean     @default(false)
+  createdAt                 DateTime    @default(now())
+  updatedAt                 DateTime    @updatedAt
+  generation                PlantGeneration[]
+  savings                   PlantSaving[]
+  serviceRequests           ServiceRequest[]
+  amcContracts              AmcContract[]
+  warranties                Warranty[]
+}
+
+model PlantGeneration {
+  id                 String     @id @default(cuid())
+  plantId            String
+  plant              SolarPlant @relation(fields: [plantId], references: [id], onDelete: Cascade)
+  periodDate         DateTime
+  periodType         String
+  actualKwh          Decimal    @db.Decimal(14, 3)
+  expectedKwh        Decimal?   @db.Decimal(14, 3)
+  gridExportKwh      Decimal?   @db.Decimal(14, 3)
+  gridImportKwh      Decimal?   @db.Decimal(14, 3)
+  performanceRatio   Decimal?   @db.Decimal(8, 4)
+  availability       Decimal?   @db.Decimal(8, 4)
+  source             String     @default("MANUAL")
+  createdAt          DateTime   @default(now())
+
+  @@unique([plantId, periodDate, periodType])
+}
+
+model PlantSaving {
+  id               String     @id @default(cuid())
+  plantId          String
+  plant            SolarPlant @relation(fields: [plantId], references: [id], onDelete: Cascade)
+  periodDate       DateTime
+  periodType       String
+  expectedSavings  Decimal?   @db.Decimal(14, 2)
+  actualSavings    Decimal    @db.Decimal(14, 2)
+  co2AvoidedKg     Decimal?   @db.Decimal(14, 2)
+  tariffUsed       Decimal?   @db.Decimal(8, 4)
+  createdAt        DateTime   @default(now())
+
+  @@unique([plantId, periodDate, periodType])
+}
+
+model ServiceRequest {
+  id             String        @id @default(cuid())
+  ticketNumber   String        @unique
+  customerId     String
+  customer       Customer      @relation(fields: [customerId], references: [id])
+  plantId        String?
+  plant          SolarPlant?   @relation(fields: [plantId], references: [id])
+  type           ServiceType
+  description    String
+  priority       String        @default("NORMAL")
+  assignedToId   String?
+  assignedTo     User?         @relation("AssignedTechnician", fields: [assignedToId], references: [id])
+  scheduledDate  DateTime?
+  completedDate  DateTime?
+  status         ServiceStatus @default(OPEN)
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  assignments    ServiceAssignment[]
+}
+
+model ServiceAssignment {
+  id          String         @id @default(cuid())
+  serviceId   String
+  service     ServiceRequest @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  userId      String
+  note        String?
+  createdAt   DateTime       @default(now())
+}
+
+model AmcContract {
+  id           String     @id @default(cuid())
+  customerId   String
+  customer     Customer   @relation(fields: [customerId], references: [id])
+  plantId      String?
+  plant        SolarPlant? @relation(fields: [plantId], references: [id])
+  assignedToId String?
+  assignedTo   User?      @relation(fields: [assignedToId], references: [id])
+  planName     String
+  startDate    DateTime
+  endDate      DateTime
+  frequency    String
+  nextService  DateTime?
+  lastService  DateTime?
+  status       AmcStatus  @default(ACTIVE)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Warranty {
+  id          String      @id @default(cuid())
+  customerId  String
+  customer    Customer    @relation(fields: [customerId], references: [id])
+  plantId     String?
+  plant       SolarPlant? @relation(fields: [plantId], references: [id])
+  type        String
+  startDate   DateTime
+  endDate     DateTime
+  notes       String?
+  documentId  String?
+  createdAt   DateTime    @default(now())
+}
+
+model Project {
+  id                String   @id @default(cuid())
+  name              String
+  location          String?
+  category          String
+  capacityKwp       Decimal? @db.Decimal(12, 3)
+  propertyType      String?
+  description       String?
+  annualGeneration  Decimal? @db.Decimal(14, 2)
+  estimatedSavings  String?
+  images            Json?
+  beforeAfter       Json?
+  isDemo            Boolean  @default(false)
+  published         Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Testimonial {
+  id             String   @id @default(cuid())
+  customerName   String
+  company        String?
+  location       String?
+  category       String?
+  systemCapacity String?
+  quote          String
+  photoKey       String?
+  approved       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+}
+
+model Faq {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  topic     String?
+  sortOrder Int      @default(0)
+  published Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String              @id @default(cuid())
+  userId    String?
+  user      User?               @relation(fields: [userId], references: [id])
+  title     String
+  body      String
+  channel   NotificationChannel @default(IN_APP)
+  readAt    DateTime?
+  entity    String?
+  entityId  String?
+  createdAt DateTime            @default(now())
+}
+
+model Document {
+  id         String    @id @default(cuid())
+  fileKey    String
+  fileName   String
+  mimeType   String
+  entityType String
+  entityId   String
+  leadId     String?
+  lead       Lead?     @relation(fields: [leadId], references: [id])
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  private    Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  entity    String
+  entityId  String
+  oldValue  Json?
+  newValue  Json?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
+
+model ContentBlock {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  body      Json
+  updatedAt DateTime @updatedAt
+}
+
+model RateLimitHit {
+  id        String   @id @default(cuid())
+  key       String
+  createdAt DateTime @default(now())
+
+  @@index([key, createdAt])
+}
