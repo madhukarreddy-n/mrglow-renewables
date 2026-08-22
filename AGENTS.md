@@ -39,7 +39,7 @@ Stop site: `Ctrl+C` in the `dev` terminal. Stop Postgres (keep data): `npm.cmd r
 
 URLs: site `http://localhost:3000`, admin `http://localhost:3000/admin/login`.
 
-After schema changes: `npx.cmd prisma migrate dev` (or SQL under `prisma/migrations` + `migrate deploy`). Stop `next dev` before `prisma generate` if Windows locks `query_engine-windows.dll.node`.
+After schema changes: `npx.cmd prisma migrate dev` (or SQL under `prisma/migrations` + `migrate deploy`). Stop `next dev` before `prisma generate` if Windows locks `query_engine-windows.dll.node`. Vercel: set `DATABASE_URL` (SSL) on the project; `next build` still succeeds if it is missing.
 
 ## Engineering rules
 

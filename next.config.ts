@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "images.unsplash.com" },
     ],
   },
+  serverExternalPackages: ["@prisma/client", "prisma"],
   async headers() {
     return [
       {

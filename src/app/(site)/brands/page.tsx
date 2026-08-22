@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { SolutionPage, solutionMetadata } from "@/components/site/solution-page";
 import { BRAND_CATEGORIES, BRAND_PILLARS } from "@/content/offerings";
-import { prisma } from "@/lib/db";
+import { prisma, isDatabaseConfigured } from "@/lib/db";
 
 export const metadata: Metadata = solutionMetadata(
   "Leading Solar Brands",
@@ -11,10 +11,12 @@ export const metadata: Metadata = solutionMetadata(
 export default async function Page() {
   let brands: { id: string; name: string; category: string; highlight: string | null }[] = [];
   try {
-    brands = await prisma.showcaseBrand.findMany({
-      where: { published: true },
-      orderBy: { sortOrder: "asc" },
-    });
+    if (isDatabaseConfigured()) {
+      brands = await prisma.showcaseBrand.findMany({
+        where: { published: true },
+        orderBy: { sortOrder: "asc" },
+      });
+    }
   } catch {
     brands = [];
   }

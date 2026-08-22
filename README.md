@@ -275,13 +275,31 @@ See `docs/ARCHITECTURE.md` and `docs/CALCULATOR.md`.
 
 ## Production (Vercel + PostgreSQL)
 
-1. Provision Postgres (Supabase or AWS RDS). Use SSL in `DATABASE_URL` as required by the host.
-2. Create a Vercel project from this GitHub repo.
-3. Set env vars from `.env.example`: a strong `AUTH_SECRET`, production `DATABASE_URL`, `NEXT_PUBLIC_APP_URL=https://www.mrglowrenewables.in`.
-4. On first deploy (or in CI): `npx prisma migrate deploy`.
-5. Seed once, then **change the admin password**. Do not use demo seed in production.
-6. Configure SMTP (AWS SES) and private object storage (S3) before go-live.
-7. Attach the GoDaddy domain.
+Build does **not** require a live database. Prisma needs `DATABASE_URL` in the schema; if it is unset during `next build`, the app uses a local placeholder and serves default copy. **Runtime** (calculator, leads, admin) needs a real Postgres URL.
+
+### Required Vercel environment variables
+
+Project → Settings → Environment Variables. Apply to **Production** and **Preview**.
+
+| Name | Example |
+| --- | --- |
+| `DATABASE_URL` | `postgresql://USER:PASSWORD@HOST:5432/postgres?sslmode=require` |
+| `AUTH_SECRET` | long random string (not the local default) |
+| `NEXT_PUBLIC_APP_URL` | `https://www.mrglowrenewables.in` (or the `*.vercel.app` URL until the domain is live) |
+| `AUTH_COOKIE_NAME` | `mrglow_session` (optional) |
+
+Also set `SMTP_*` and storage keys before go-live. See `.env.example`.
+
+### Deploy steps
+
+1. Provision Postgres (Supabase, Neon, or AWS RDS). Use SSL in `DATABASE_URL` (`sslmode=require` on Supabase/Neon).
+2. Import the GitHub repo in Vercel (framework: Next.js). Region in `vercel.json` is `bom1` (Mumbai).
+3. Add the env vars above, then redeploy.
+4. Each production build runs `prisma migrate deploy` when `DATABASE_URL` points at a real host.
+5. Seed once from a trusted machine (`npx prisma db seed`) against production, then **change the admin password**. Do not seed demo leads as real customers.
+6. Attach the GoDaddy domain (below).
+
+Do not run `setup:local` on Vercel.
 
 ### GoDaddy DNS → Vercel
 

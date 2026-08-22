@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { prisma } from "@/lib/db";
+import { prisma, isDatabaseConfigured } from "@/lib/db";
 import { getSettings } from "@/lib/settings";
 import { CalculatorTeaser } from "@/components/site/calculator-teaser";
 import { SimplePath } from "@/components/site/journey-path";
@@ -24,18 +24,22 @@ export default async function HomePage() {
   let projects: { id: string; name: string; location: string | null; capacityKwp: unknown; category: string }[] = [];
   let brands: { id: string; name: string; category: string; highlight: string | null }[] = [];
   try {
-    faqs = await prisma.faq.findMany({ where: { published: true }, orderBy: { sortOrder: "asc" } });
-    testimonials = await prisma.testimonial.findMany({ where: { approved: true }, take: 6 });
-    projects = await prisma.project.findMany({ where: { published: true, isDemo: false }, take: 6 });
-    brands = await prisma.showcaseBrand.findMany({ where: { published: true }, orderBy: { sortOrder: "asc" } });
+    if (isDatabaseConfigured()) {
+      faqs = await prisma.faq.findMany({ where: { published: true }, orderBy: { sortOrder: "asc" } });
+      testimonials = await prisma.testimonial.findMany({ where: { approved: true }, take: 6 });
+      projects = await prisma.project.findMany({ where: { published: true, isDemo: false }, take: 6 });
+      brands = await prisma.showcaseBrand.findMany({ where: { published: true }, orderBy: { sortOrder: "asc" } });
+    }
   } catch {
     faqs = [];
   }
 
   let components: { name: string; text: string }[] = [];
   try {
-    const block = await prisma.contentBlock.findUnique({ where: { slug: "components" } });
-    components = (block?.body as { name: string; text: string }[]) ?? [];
+    if (isDatabaseConfigured()) {
+      const block = await prisma.contentBlock.findUnique({ where: { slug: "components" } });
+      components = (block?.body as { name: string; text: string }[]) ?? [];
+    }
   } catch {
     components = [];
   }

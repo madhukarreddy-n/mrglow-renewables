@@ -13,6 +13,8 @@ const outfit = Outfit({
   variable: "--font-outfit",
 });
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata(): Promise<Metadata> {
   const s = await getSettings();
   return {

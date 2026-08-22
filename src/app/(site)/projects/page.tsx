@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
-import { prisma } from "@/lib/db";
+import { prisma, isDatabaseConfigured } from "@/lib/db";
 
 export const metadata: Metadata = { title: "Projects" };
 
 export default async function Page() {
   let projects: Awaited<ReturnType<typeof prisma.project.findMany>> = [];
   try {
-    projects = await prisma.project.findMany({
-      where: { published: true, isDemo: false },
-      orderBy: { createdAt: "desc" },
-    });
+    if (isDatabaseConfigured()) {
+      projects = await prisma.project.findMany({
+        where: { published: true, isDemo: false },
+        orderBy: { createdAt: "desc" },
+      });
+    }
   } catch {
     projects = [];
   }

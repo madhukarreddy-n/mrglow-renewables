@@ -1,4 +1,4 @@
-import { prisma } from "./db";
+import { prisma, isDatabaseConfigured } from "./db";
 
 export type CompanySettings = {
   legalName: string;
@@ -68,6 +68,7 @@ export const DEFAULT_SETTINGS: CompanySettings = {
 };
 
 export async function getSettings(): Promise<CompanySettings> {
+  if (!isDatabaseConfigured()) return DEFAULT_SETTINGS;
   try {
     const row = await prisma.setting.findUnique({ where: { key: "company" } });
     if (!row) return DEFAULT_SETTINGS;
