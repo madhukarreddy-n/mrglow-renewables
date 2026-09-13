@@ -1,16 +1,23 @@
 import type { Metadata } from "next";
-import { getSettings } from "@/lib/settings";
+import { BRAND } from "@/lib/brand";
+import { GoldCta } from "@/components/site/page-chrome";
 
 export const metadata: Metadata = { title: "Privacy Policy" };
 
-export default async function Page() {
-  const s = await getSettings();
+export default function Page() {
   return (
-    <article className="section">
-      <div className="container-wide max-w-3xl whitespace-pre-wrap text-muted">
-        <h1 className="font-display text-4xl text-navy">Privacy Policy</h1>
-        <p className="mt-8">{s.privacy}</p>
-      </div>
+    <article>
+      <section className="bg-navy py-16 text-white">
+        <div className="container-wide">
+          <h1 className="font-display text-4xl">Privacy Policy</h1>
+        </div>
+      </section>
+      <section className="section">
+        <div className="container-wide max-w-3xl text-muted">
+          <p>{BRAND.privacy}</p>
+        </div>
+      </section>
+      <GoldCta />
     </article>
   );
 }

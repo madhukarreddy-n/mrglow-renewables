@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CalculatorWizard } from "@/components/calculator/wizard";
+import { PageHero, FourSteps, FaqBlock, GoldCta } from "@/components/site/page-chrome";
 
 export const metadata: Metadata = {
   title: "Solar Savings Calculator",
@@ -8,15 +9,21 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <section className="section">
-      <div className="container-wide max-w-3xl">
-        <p className="text-xs uppercase tracking-[0.2em] text-lime">Guided estimate</p>
-        <h1 className="mt-2 font-display text-4xl">Solar Savings Calculator</h1>
-        <p className="mt-3 text-muted">
-          Three short steps. You will see results before we ask for your contact details.
-        </p>
-        <CalculatorWizard />
-      </div>
-    </section>
+    <article>
+      <PageHero
+        eyebrow="Solar calculator"
+        headline="Calculate your rooftop solar savings"
+        support="Enter your bill, see an estimate, then request a quote. Results are not a quotation."
+        image="/brand/brochure-7.jpg"
+      />
+      <section className="bg-[#eef8e8] py-16">
+        <div className="container-wide max-w-3xl">
+          <CalculatorWizard />
+        </div>
+      </section>
+      <FourSteps />
+      <FaqBlock />
+      <GoldCta />
+    </article>
   );
 }

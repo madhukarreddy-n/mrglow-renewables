@@ -1,15 +1,5 @@
 # Solar calculator engine
 
-All math lives in `engine.ts` (`calculateSolarSavings`). UI and API **call** it; they do not copy formulas.
+All math lives in `engine.ts` (`calculateSolarSavings`). The public wizard and homepage teaser **call** it with `DEFAULT_CALCULATOR_PARAMS`. Do not copy subsidy slabs or payback formulas into JSX.
 
-Config at runtime: `resolve.ts` + versioned Prisma tables (`CalculatorConfig`, subsidy slabs, category pricing). Admin settings update DB — do not hard-code tariffs or subsidy rupees in React.
-
-## Persist reports
-
-Store `input_data`, `calculation_parameters`, `calculation_version`, and `results`. PDF: `src/lib/pdf/solar-report.tsx` from the saved report, not a second calculation path.
-
-## Copy
-
-Keep calculator / subsidy / financial disclaimers from the engine module. Estimates are not a quotation or DISCOM approval.
-
-Detail: `docs/CALCULATOR.md`.
+Defaults are indicative (not a DISCOM or MNRE quotation). Keep the financial / subsidy / calculator disclaimers exported from the engine.

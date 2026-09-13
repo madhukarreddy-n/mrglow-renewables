@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, Outfit } from "next/font/google";
 import "./globals.css";
-import { getSettings } from "@/lib/settings";
+import { BRAND } from "@/lib/brand";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -13,25 +13,20 @@ const outfit = Outfit({
   variable: "--font-outfit",
 });
 
-export const dynamic = "force-dynamic";
-
-export async function generateMetadata(): Promise<Metadata> {
-  const s = await getSettings();
-  return {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
-    title: {
-      default: `${s.brandName} | Solar solutions in Hyderabad`,
-      template: `%s | ${s.brandName}`,
-    },
-    description: s.heroSupport,
-    openGraph: {
-      title: s.heroHeadline,
-      description: s.heroSupport,
-      locale: "en_IN",
-      type: "website",
-    },
-  };
-}
+export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://www.mrglowrenewables.in"),
+  title: {
+    default: `${BRAND.brandName} | Solar solutions in Hyderabad`,
+    template: `%s | ${BRAND.brandName}`,
+  },
+  description: BRAND.heroSupport,
+  openGraph: {
+    title: BRAND.heroHeadline,
+    description: BRAND.heroSupport,
+    locale: "en_IN",
+    type: "website",
+  },
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

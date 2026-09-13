@@ -3,10 +3,9 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
-      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "*.supabase.co" },
     ],
   },
-  serverExternalPackages: ["@prisma/client", "prisma"],
   async headers() {
     return [
       {
@@ -19,11 +18,6 @@ const nextConfig: NextConfig = {
         ],
       },
     ];
-  },
-  experimental: {
-    serverActions: {
-      bodySizeLimit: "20mb",
-    },
   },
 };
 

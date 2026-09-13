@@ -5,9 +5,10 @@ Routes under `src/app/(site)`. Shared chrome: `layout.tsx` + `src/components/sit
 ## Patterns
 
 - Solution-style pages: `SolutionPage` + `solutionMetadata` from `src/components/site/solution-page.tsx`.
-- Homepage sections (brands, kits, mounting, tin shed, cleaning) stay in sync with `src/content/offerings.ts` and `/brands`, `/solar-kits`, `/mounting-structures`, `/tin-shed-solar`, `/solar-cleaning`.
+- Header: white bar, phone, gold **Get a Quote**. Nav: Rooftop Solar / More (see `logo.tsx` `NAV`).
+- Homepage: hero + 3-step `QuoteWizard`, 4 steps, `HomeCalculator`. Do not copy competitor discounts, review scores, or app/insurance claims.
 - Consultation: `ConsultationForm`. Maintenance CTA → `/book-consultation?intent=maintenance`. Do not reuse this route for privacy/terms (`/privacy`, `/terms`).
-- Calculator UI: `src/components/calculator` calling `/api/calculator` only — no formulas in the wizard.
+- Calculator UI: `src/components/calculator` calling `calculateSolarSavings` in `engine.ts`. Consultation posts to `/api/public/consultations`.
 
 ## Imagery and names
 

@@ -1,77 +1,73 @@
 import Link from "next/link";
-import { prisma } from "@/lib/db";
-import { LeadStatus } from "@prisma/client";
+import { redirect } from "next/navigation";
+import { createServerSupabase } from "@/lib/supabase/server";
+import { requireEmployee } from "@/lib/supabase/auth";
+import { LEAD_STATUSES, STATUS_LABEL, type LeadStatus } from "@/lib/workflow";
+
+export const dynamic = "force-dynamic";
 
 export default async function LeadsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; status?: string }>;
+  searchParams: Promise<{ status?: string; archived?: string }>;
 }) {
-  const sp = await searchParams;
-  const leads = await prisma.lead.findMany({
-    where: {
-      ...(sp.status ? { status: sp.status as LeadStatus } : {}),
-      ...(sp.q
-        ? {
-            OR: [
-              { leadNumber: { contains: sp.q, mode: "insensitive" } },
-              { name: { contains: sp.q, mode: "insensitive" } },
-              { phone: { contains: sp.q } },
-              { email: { contains: sp.q, mode: "insensitive" } },
-            ],
-          }
-        : {}),
-    },
-    orderBy: { createdAt: "desc" },
-    include: { assignedTo: true, calculatorReports: { take: 1, orderBy: { createdAt: "desc" } } },
-    take: 100,
-  });
+  try {
+    await requireEmployee();
+  } catch {
+    redirect("/admin/login");
+  }
+  const { status, archived: archivedParam } = await searchParams;
+  const archived = archivedParam === "1";
+  const supabase = await createServerSupabase();
+  let q = supabase.from("leads").select("*").order("created_at", { ascending: false });
+  q = archived ? q.not("archived_at", "is", null) : q.is("archived_at", null);
+  if (status) q = q.eq("status", status);
+  const { data: leads } = await q;
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-display text-2xl">Leads</h1>
-        <Link href="/admin/leads/new" className="btn-primary !py-2 text-sm">New lead</Link>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="font-display text-3xl">{archived ? "Archived leads" : "Leads"}</h1>
+          <p className="mt-1 text-sm text-muted">
+            {archived ? "Hidden from the pipeline. Restore from the lead page." : "Filter by workflow stage."}
+          </p>
+        </div>
       </div>
-      <form className="mt-4 flex gap-2">
-        <input name="q" placeholder="Search number, name, phone, email" defaultValue={sp.q} />
-        <select name="status" defaultValue={sp.status || ""}>
-          <option value="">All statuses</option>
-          {Object.values(LeadStatus).map((s) => (
-            <option key={s}>{s}</option>
-          ))}
-        </select>
-        <button className="btn-outline">Filter</button>
-      </form>
-      <div className="mt-4 overflow-x-auto rounded-2xl bg-white">
-        <table className="min-w-full text-left text-sm">
-          <thead className="border-b text-xs text-muted">
-            <tr>
-              {["Lead", "Customer", "Phone", "Category", "Source", "Status", "Assigned", "Created"].map((h) => (
-                <th key={h} className="px-3 py-2 font-medium">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {leads.map((l) => (
-              <tr key={l.id} className="border-b last:border-0">
-                <td className="px-3 py-2">
-                  <Link className="font-semibold" href={`/admin/leads/${l.id}`}>{l.leadNumber}</Link>
-                  {l.isDemo ? <span className="ml-2 text-xs text-gold">demo</span> : null}
-                </td>
-                <td className="px-3 py-2">{l.name}</td>
-                <td className="px-3 py-2">{l.phone}</td>
-                <td className="px-3 py-2">{l.category}</td>
-                <td className="px-3 py-2">{l.source}</td>
-                <td className="px-3 py-2">{l.status}</td>
-                <td className="px-3 py-2">{l.assignedTo?.name || "—"}</td>
-                <td className="px-3 py-2">{l.createdAt.toLocaleDateString("en-IN")}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {leads.length === 0 && <p className="p-8 text-muted">No leads yet.</p>}
+      <div className="mt-6 flex flex-wrap gap-2">
+        <Link href="/admin/leads" className={`rounded-full px-3 py-1 text-xs ${!status && !archived ? "bg-navy text-white" : "bg-white"}`}>
+          All
+        </Link>
+        {LEAD_STATUSES.map((s) => (
+          <Link
+            key={s}
+            href={`/admin/leads?status=${s}`}
+            className={`rounded-full px-3 py-1 text-xs ${status === s && !archived ? "bg-navy text-white" : "bg-white"}`}
+          >
+            {STATUS_LABEL[s]}
+          </Link>
+        ))}
+        <Link
+          href="/admin/leads?archived=1"
+          className={`rounded-full px-3 py-1 text-xs ${archived ? "bg-navy text-white" : "bg-white"}`}
+        >
+          Archived
+        </Link>
       </div>
+      <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {(leads || []).map((lead) => (
+          <Link key={lead.id} href={`/admin/leads/${lead.id}`} className="card p-5">
+            <p className="text-xs uppercase text-muted">{STATUS_LABEL[lead.status as LeadStatus] || lead.status}</p>
+            <h2 className="mt-2 font-display text-xl">{lead.name}</h2>
+            <p className="text-sm text-muted">
+              {lead.phone}
+              {lead.city ? ` · ${lead.city}` : ""}
+            </p>
+            <p className="mt-2 text-xs text-muted">{lead.source}</p>
+          </Link>
+        ))}
+      </div>
+      {(leads || []).length === 0 ? <p className="mt-8 text-muted">No leads in this view.</p> : null}
     </div>
   );
 }

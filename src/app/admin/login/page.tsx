@@ -8,7 +8,7 @@ export default function AdminLoginPage() {
       <div className="card w-full max-w-md p-8">
         <Logo />
         <h1 className="mt-6 font-display text-2xl">Staff sign in</h1>
-        <p className="mt-2 text-sm text-muted">CRM and operations access is restricted.</p>
+        <p className="mt-2 text-sm text-muted">Use the same email you registered as staff. First time here with an empty database? Use Create first admin.</p>
         <Suspense>
           <div className="mt-6">
             <LoginForm />

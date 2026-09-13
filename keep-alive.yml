@@ -1,0 +1,18 @@
+name: Keep Supabase project alive
+
+# Supabase pauses free-tier projects after 7 days with no API activity.
+# This pings a lightweight health-check endpoint every 3 days so the
+# project never auto-pauses — costs nothing, runs on GitHub's free tier.
+
+on:
+  schedule:
+    - cron: "0 6 */3 * *"   # every 3 days at 06:00 UTC
+  workflow_dispatch: {}      # allow manual runs too
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping health check endpoint
+        run: |
+          curl -sf https://www.mrglowrenewables.in/api/health || exit 1

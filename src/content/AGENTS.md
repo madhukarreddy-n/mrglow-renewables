@@ -2,9 +2,10 @@
 
 Edit marketing text here, not as one-off strings scattered through pages.
 
-- `brochure.ts` — `legalName`, `brandShort`, hero, pillars, solutions, “why” cards. Keep in sync with `DEFAULT_SETTINGS` in `src/lib/settings.ts`.
+- `brochure.ts` — `legalName`, `brandShort`, hero, pillars, solutions, “why” cards. Keep in sync with `src/lib/brand.ts`.
 - `journey.ts` — 4-step simple path and 8-step process. Voice: **Mr.GLOW** / **Mr.GLOW RENEWABLES**.
 - `offerings.ts` — brands pillars, kits, 0.5/1/2 m structures, tin-shed methods, cleaning.
+- `bom-seed.json` — 3 kW Bill of Materials catalogue seed (admin loads via `POST /api/bom/seed`).
 
 ## Voice
 

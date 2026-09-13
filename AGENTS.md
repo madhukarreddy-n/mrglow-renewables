@@ -1,55 +1,59 @@
 # Agent guide — Mr.GLOW RENEWABLES
 
-This repo is a **Next.js 15 App Router** product: public solar website, savings calculator, consultation leads, and admin CRM (surveys, designs, quotations, plants, service). PostgreSQL via Prisma. Nested `AGENTS.md` files apply when you work in those folders.
+This repo is a **Next.js 15 App Router** product: public solar website, client-side savings calculator, consultation leads, and a staff portal (workflow + proposals + photos). **Supabase** is Postgres, Auth, and Storage. Email is Resend or Brevo. Nested `AGENTS.md` files apply under the folders they sit in.
 
-Human setup, **start / stop / restart**, env vars, and Windows/`npm.cmd` notes: `README.md` (section *Start, stop, and restart*). Architecture: `docs/ARCHITECTURE.md`.
+Human setup, env vars, and Windows/`npm.cmd` notes: `README.md`. Data model: `docs/DATA_MODEL.md` (DDL source of truth: `schema.sql` / `supabase/schema.sql`).
 
 ## Product truth
 
 - Legal name (company entity in copy, footer, terms, schema `legalName`): **Mr.GLOW RENEWABLES PVT LTD**
 - Brand short (`brandName`, titles, everyday “Mr.GLOW”): **Mr.GLOW RENEWABLES**
-- Wordmark: `BrandWordmark` / `GlowO` in `src/components/site/logo.tsx` — GLOW one colour; O is the same letter size as G/L/W; orange bolt **cuts through** the O at forward ~45°. Full lockup art: `public/brand/logo-lockup.jpg` (header emblem crop + footer/about lockup).
-- Identity fields are locked in `src/lib/settings.ts` (`legalName`, `brandName`, tagline, about, mission, vision, hero) over Admin DB values. Contact remains editable.
+- Wordmark: `BrandWordmark` / `GlowO` in `src/components/site/logo.tsx` — GLOW one colour; O is the same letter size as G/L/W; orange bolt **cuts through** the O at forward ~45°. Full lockup art: `public/brand/logo-lockup.jpg`
+- Identity fields are locked in `src/lib/brand.ts`. Contact is not an Admin CMS field.
 - Verified public contact only: email `mrglowrenewables@gmail.com`, site `www.mrglowrenewables.in`, location **Hyderabad** (no street address), phone/WhatsApp `9912343142`.
-- Do **not** invent awards, OEM partnerships, project counts, testimonials, or statistics. Public stats only if `publishStatistics` is on and values are real.
-- Named brand logos on the site only from **published** `ShowcaseBrand` rows. Otherwise use component categories, not fake partners.
+- Do **not** invent awards, OEM partnerships, project counts, testimonials, or statistics.
+- Named brand logos on the site only when real published artwork exists. Otherwise use component categories, not fake partners.
 - Do not use “MR Glow Energy Resources” or “MrGlow Renewables” in new copy.
+
+
 
 ## Layout
 
-| Area | Path |
-| --- | --- |
-| Public pages | `src/app/(site)` |
-| Public chrome | `src/components/site` |
-| Brochure / offering copy | `src/content` |
-| Admin CRM | `src/app/admin` |
-| APIs | `src/app/api` |
-| Calculator (pure TS) | `src/lib/calculator` |
-| Auth / RBAC | `src/lib/auth` |
-| Schema | `prisma/schema.prisma` |
+
+| Area                     | Path                                              |
+| ------------------------ | ------------------------------------------------- |
+| Public pages             | `src/app/(site)`                                  |
+| Public chrome            | `src/components/site`                             |
+| Brochure / offering copy | `src/content`                                     |
+| Staff portal             | `src/app/admin`                                   |
+| APIs                     | `src/app/api`                                     |
+| Calculator (pure TS)     | `src/lib/calculator/engine.ts`                    |
+| Auth / workflow          | `src/lib/supabase`, `src/lib/workflow.ts`         |
+| BOM / estimate PDF       | `src/lib/bom.ts`, `src/lib/proposal-pdf.ts`       |
+| Schema                   | `schema.sql` (copy also in `supabase/schema.sql`) |
+
+
+
 
 ## Commands (Windows: `npm.cmd` if `npm.ps1` is blocked)
 
 ```powershell
-npm.cmd run docker:up
 npm.cmd run dev
 ```
 
-Stop site: `Ctrl+C` in the `dev` terminal. Stop Postgres (keep data): `npm.cmd run docker:down`. First-time / after DB wipe: `npm.cmd run setup:local`. If port 3000 stays in use, `netstat -ano | findstr :3000` then `taskkill /PID <listening-pid> /T /F`.
-
-URLs: site `http://localhost:3000`, admin `http://localhost:3000/admin/login`.
-
-After schema changes: `npx.cmd prisma migrate dev` (or SQL under `prisma/migrations` + `migrate deploy`). Stop `next dev` before `prisma generate` if Windows locks `query_engine-windows.dll.node`. Vercel: set `DATABASE_URL` (SSL) on the project; `next build` still succeeds if it is missing.
+URLs: site `http://localhost:3000`, staff `http://localhost:3000/admin/login`.
 
 ## Engineering rules
 
-- TypeScript, server-first. Mutations: server actions (`src/app/admin/actions.ts`) or route handlers with `requirePermission` / `requireApiPermission`.
-- Never put calculator formulas in React. Never put secrets in client bundles.
+- TypeScript, server-first mutations in Route Handlers. Check the caller's `employees.role` on the server.
+- Calculator **formulas** stay in `engine.ts`. The wizard may **call** `calculateSolarSavings`; do not duplicate slab math in JSX.
+- Never put `SUPABASE_SERVICE_ROLE_KEY` or email API keys in client bundles.
 - Do not commit `.env`. Use `.env.example`.
-- Prefer editing existing modules over new parallel systems. Match surrounding naming and Tailwind (`navy`, `lime`, `btn-primary`).
-- Do not rewrite `README.md` or add docs unless asked.
+- Prefer editing existing modules. Match Tailwind (`navy`, `lime`, `btn-primary`).
 - Do not invent extra contact channels, offices, or phone numbers.
 
-## Lead profile (CRM)
 
-The **lead record** is the source of truth for site survey, design images, line items, and proposal PDF. Do not add duplicate customer/survey/price forms that the proposal ignores. See `src/app/admin/AGENTS.md`.
+
+## Lead record
+
+The **lead row** is the source of truth for workflow, assignment, and proposals. Do not add a second customer table that the proposal ignores.

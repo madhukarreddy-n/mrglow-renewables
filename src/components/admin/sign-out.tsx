@@ -1,11 +1,14 @@
 "use client";
 
-export function SignOutButton() {
+import { createBrowserSupabase } from "@/lib/supabase/browser";
+
+export function SignOutButton({ className = "text-xs text-white/50" }: { className?: string }) {
   return (
     <button
-      className="text-xs text-white/50"
+      className={className}
       onClick={async () => {
-        await fetch("/api/auth/logout", { method: "POST" });
+        const supabase = createBrowserSupabase();
+        await supabase.auth.signOut();
         window.location.href = "/admin/login";
       }}
     >

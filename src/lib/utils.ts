@@ -37,6 +37,3 @@ export function telLink(phone: string) {
   return `tel:+91${phone.replace(/\D/g, "").slice(-10)}`;
 }
 
-export function nextLeadNumber(seq: number, year = new Date().getFullYear()) {
-  return `MRG-${year}-${String(seq).padStart(5, "0")}`;
-}

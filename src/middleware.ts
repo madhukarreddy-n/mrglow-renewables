@@ -1,27 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
-import { jwtVerify } from "jose";
+import { createServerClient } from "@supabase/ssr";
 
 export async function middleware(request: NextRequest) {
-  if (!request.nextUrl.pathname.startsWith("/admin")) return NextResponse.next();
-  if (request.nextUrl.pathname.startsWith("/admin/login")) return NextResponse.next();
-
-  const token = request.cookies.get(process.env.AUTH_COOKIE_NAME || "mrglow_session")?.value;
-  if (!token || !process.env.AUTH_SECRET) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/admin/login";
-    url.searchParams.set("next", request.nextUrl.pathname);
-    return NextResponse.redirect(url);
-  }
-  try {
-    await jwtVerify(token, new TextEncoder().encode(process.env.AUTH_SECRET));
+  const { pathname } = request.nextUrl;
+  if (!pathname.startsWith("/admin") || pathname.startsWith("/admin/login")) {
     return NextResponse.next();
-  } catch {
-    const url = request.nextUrl.clone();
-    url.pathname = "/admin/login";
-    return NextResponse.redirect(url);
   }
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) {
+    const login = request.nextUrl.clone();
+    login.pathname = "/admin/login";
+    return NextResponse.redirect(login);
+  }
+
+  let response = NextResponse.next({ request });
+  const supabase = createServerClient(url, key, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        response = NextResponse.next({ request });
+        cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+      },
+    },
+  });
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    const login = request.nextUrl.clone();
+    login.pathname = "/admin/login";
+    login.searchParams.set("next", pathname);
+    return NextResponse.redirect(login);
+  }
+  return response;
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin", "/admin/:path*"],
 };

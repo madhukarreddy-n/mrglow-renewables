@@ -82,7 +82,7 @@ function round(n: number, d = 2) {
   return Math.round(n * p) / p;
 }
 
-function monthlyUnitsFromInput(input: CalculatorInput, unitsPerKwMonth: number) {
+function monthlyUnitsFromInput(input: CalculatorInput, _unitsPerKwMonth: number) {
   if (input.mode === "UNITS") {
     return Math.max(0, input.monthlyUnits ?? 0);
   }
@@ -213,3 +213,36 @@ export const SUBSIDY_DISCLAIMER =
 
 export const CALCULATOR_DISCLAIMER =
   "Solar savings shown are estimates based on the information and assumptions provided. Actual generation, savings, subsidy eligibility and project cost may vary based on site conditions, electricity tariff, government policies, system design and other factors.";
+
+/** Client-side defaults (no database). Residential DCR-style slabs are estimates only. */
+export const DEFAULT_CALCULATOR_PARAMS: CalculatorParameters = {
+  version: 1,
+  stateCode: null,
+  category: null,
+  subsidyType: "DCR",
+  systemCostPerKwp: 55000,
+  panelWattage: 550,
+  peakSunHours: 5,
+  generationFactor: 1,
+  systemEfficiency: 0.8,
+  roofAreaPerKwp: 8,
+  annualDegradation: 0.007,
+  tariffEscalation: 0.03,
+  maintenancePct: 0.01,
+  projectLifetime: 25,
+  co2KgPerKwh: 0.82,
+  treesPerTonCo2: 16.5,
+  unitsPerKwMonth: 120,
+  subsidy: {
+    type: "DCR",
+    eligible: true,
+    maxSubsidy: 78000,
+    slabs: [
+      { upToKwp: 2, amountPerKwp: 30000 },
+      { upToKwp: 3, amountPerKwp: 18000 },
+      { upToKwp: null, amountPerKwp: 0 },
+    ],
+    notes: "Estimated central rooftop subsidy for eligible residential systems. Confirm at survey.",
+  },
+};
+

@@ -119,12 +119,19 @@ export function Logo({
 
 export const NAV = [
   {
-    label: "Solutions",
-    href: "/#solutions",
+    label: "Rooftop Solar",
+    href: "/#rooftop",
     children: [
       { href: "/residential-solar", label: "Residential Solar" },
       { href: "/commercial-solar", label: "Commercial Solar" },
       { href: "/industrial-solar", label: "Industrial Solar" },
+      { href: "/gated-communities", label: "Housing societies" },
+    ],
+  },
+  {
+    label: "More",
+    href: "/#solutions",
+    children: [
       { href: "/solar-epc", label: "Solar EPC" },
       { href: "/bess", label: "BESS" },
       { href: "/on-grid-solar", label: "On-Grid Solar" },
@@ -134,18 +141,20 @@ export const NAV = [
       { href: "/mounting-structures", label: "Mounting Structures" },
       { href: "/tin-shed-solar", label: "Tin Shed / Metal Roof" },
       { href: "/solar-cleaning", label: "Cleaning & Maintenance" },
-      { href: "/brands", label: "Leading Brands" },
       { href: "/solar-water-pumps", label: "Solar Water Pumps" },
-      { href: "/gated-communities", label: "Gated Communities" },
       { href: "/ground-mounted-solar", label: "Ground Mounted Solar" },
+      { href: "/brands", label: "Components" },
+      { href: "/how-it-works", label: "How It Works" },
+      { href: "/why-mrglow", label: "Why Mr.GLOW" },
+      { href: "/solar-subsidy", label: "Solar Subsidy" },
+      { href: "/faq", label: "FAQs" },
     ],
   },
-  { href: "/how-it-works", label: "How It Works" },
-  { href: "/why-mrglow", label: "Why Mr.GLOW" },
   { href: "/solar-calculator", label: "Solar Calculator" },
   { href: "/about", label: "About Us" },
   { href: "/contact", label: "Contact" },
 ];
+
 
 export function WhatsAppIcon(props: { className?: string }) {
   return (
