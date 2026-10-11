@@ -12,4 +12,4 @@ Routes under `src/app/(site)`. Shared chrome: `layout.tsx` + `src/components/sit
 
 ## Imagery and names
 
-Use `public/brand/` (brochure extracts and `logo-lockup.jpg`). Do not drop Unsplash photos as if they were Mr.GLOW sites. Unpublished projects stay empty on `/projects`. Legal name **Mr.GLOW RENEWABLES PVT LTD**; short **Mr.GLOW RENEWABLES**.
+Use `public/brand/` for published brand artwork and brochure extracts. The homepage hero uses `Logo & Title.png`; do not drop Unsplash photos as if they were Mr.GLOW sites. Unpublished projects stay empty on `/projects`. Legal name **Mr.GLOW RENEWABLES PVT LTD**; short **Mr.GLOW RENEWABLES**.

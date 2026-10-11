@@ -149,20 +149,9 @@ function quoteGroups(lines: ProposalLine[]) {
 }
 
 async function embedLogo(doc: PDFDocument) {
-  const bases = [path.join(process.cwd(), "public", "brand")];
-  for (const dir of bases) {
-    try {
-      return await doc.embedPng(await readFile(path.join(dir, "logo-lockup.png")));
-    } catch {
-      /* try jpg */
-    }
-    try {
-      return await doc.embedJpg(await readFile(path.join(dir, "logo-lockup.jpg")));
-    } catch {
-      /* next */
-    }
-  }
-  return null;
+  return await doc.embedPng(
+    await readFile(path.join(process.cwd(), "public", "brand", "Logo & Title.png")),
+  );
 }
 
 async function embedPhoto(doc: PDFDocument, bytes: Uint8Array) {
@@ -274,11 +263,10 @@ export async function generateProposalPdf(input: PdfInput) {
 function drawCover(book: Book, input: PdfInput, issuedAt: Date) {
   const page = addPage(book);
   if (book.logo) {
-    const w = 180;
-    const h = Math.min((book.logo.height / book.logo.width) * w, 52);
-    page.drawImage(book.logo, { x: 40, y: 748 - h, width: w, height: h });
+    const w = 132;
+    const h = (book.logo.height / book.logo.width) * w;
+    page.drawImage(book.logo, { x: 40, y: 680, width: w, height: h });
   }
-  drawText(page, book.font, book.bold, BRAND.brandName, 40, 680, 11, { bold: true, color: gold });
   drawText(page, book.font, book.bold, `${siteLabel(input.lead.site_type)} Solar`, 40, 560, 16, { color: muted });
   drawText(page, book.font, book.bold, "PROPOSAL", 40, 510, 36, { bold: true });
   page.drawRectangle({ x: 40, y: 492, width: 120, height: 4, color: gold });
@@ -584,8 +572,8 @@ function drawTerms(book: Book) {
 function drawThanks(book: Book, input: PdfInput) {
   const page = addPage(book);
   if (book.logo) {
-    const w = 200;
-    const h = Math.min((book.logo.height / book.logo.width) * w, 64);
+    const w = 132;
+    const h = (book.logo.height / book.logo.width) * w;
     page.drawImage(book.logo, { x: (PAGE.w - w) / 2, y: 620, width: w, height: h });
   }
   drawText(page, book.font, book.bold, "Thank you", 40, 540, 32, { bold: true });

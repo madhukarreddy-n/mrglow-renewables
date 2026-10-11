@@ -13,7 +13,7 @@ export function SiteHeader({ settings }: { settings: CompanySettings }) {
 
   return (
     <header className="sticky top-0 z-50 border-b border-navy/10 bg-white text-navy shadow-sm">
-      <div className="container-wide flex h-16 items-center justify-between gap-4">
+      <div className="container-wide flex h-20 items-center justify-between gap-4 xl:h-24">
         <Logo />
         <nav className="hidden items-center gap-6 lg:flex" aria-label="Primary">
           {NAV.map((item) =>
