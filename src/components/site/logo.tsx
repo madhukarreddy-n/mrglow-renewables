@@ -79,21 +79,19 @@ export function BrandWordmark({
 }
 
 export function Logo({
-  light = false,
   variant = "header",
 }: {
-  light?: boolean;
   variant?: "header" | "lockup";
 }) {
   if (variant === "lockup") {
     return (
       <Link href="/" className="inline-block overflow-hidden rounded-2xl bg-white p-2" aria-label="Mr.GLOW RENEWABLES PVT LTD">
         <Image
-          src="/brand/logo-lockup.jpg"
+          src="/brand/Logo & Title.png"
           alt="Mr.GLOW RENEWABLES PVT LTD — Powering a Greener Tomorrow"
-          width={280}
-          height={340}
-          className="h-36 w-auto sm:h-44"
+          width={1799}
+          height={1821}
+          className="h-48 w-auto sm:h-56"
           priority
         />
       </Link>
@@ -102,17 +100,24 @@ export function Logo({
 
   return (
     <Link href="/" className="flex items-center gap-3" aria-label="Mr.GLOW RENEWABLES PVT LTD">
-      <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-white ring-2 ring-lime/80">
+      <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-white ring-2 ring-lime/80">
         <Image
-          src="/brand/logo-lockup.jpg"
+          src="/brand/Logo.png"
           alt=""
           fill
-          className="object-cover object-[50%_12%]"
+          className="object-contain p-0.5"
           sizes="48px"
           priority
         />
       </span>
-      <BrandWordmark light={light} showLegal />
+      <Image
+        src="/brand/Title.png"
+        alt=""
+        width={1799}
+        height={605}
+        className="h-14 w-auto md:h-16 xl:h-20"
+        priority
+      />
     </Link>
   );
 }

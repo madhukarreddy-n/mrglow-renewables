@@ -53,13 +53,14 @@ export default function HomePage() {
 
       <section className="relative min-h-[92vh] overflow-hidden bg-navy-deep text-white">
         <Image
-          src="/brand/brochure-1.jpg"
-          alt="Rooftop solar"
-          fill
-          className="object-cover object-center"
+          src="/brand/Logo & Title.png"
+          alt=""
+          width={1799}
+          height={1821}
+          className="absolute right-0 top-1/2 h-[36%] w-auto max-w-full -translate-y-1/2 object-contain object-right brightness-125 opacity-100 lg:top-0 lg:h-[80%] lg:max-w-none lg:translate-y-0"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-navy-deep/92 via-navy-deep/70 to-navy-deep/25" />
+        <div className="absolute inset-0 bg-gradient-to-b from-navy-deep/95 via-navy-deep/80 to-navy-deep/35 lg:bg-gradient-to-r lg:from-navy-deep/95 lg:via-navy-deep/75 lg:to-transparent" />
         <div className="container-wide relative grid items-center gap-10 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:py-20">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-lime">{BRAND.location} · Rooftop solar</p>

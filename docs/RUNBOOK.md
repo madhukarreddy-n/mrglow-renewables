@@ -86,6 +86,23 @@ They are looking at a status filter with no rows, or schema is old. After the 20
 
 Re-run `schema.sql` so `leads.archived_at` exists. Delete removes Storage objects under `proposal-pdfs/{leadId}` and `proposal-photos/{proposalId}`.
 
+## Login: Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+Local `.env` / `.env.local` is **not** sent to GitHub or Vercel. The live site [www.mrglowrenewables.in](https://www.mrglowrenewables.in/) only sees keys added in the Vercel project.
+
+1. Vercel → the Mr.GLOW project → **Settings → Environment Variables**.
+2. Add at least (Production **and** Preview; Development if you use it):
+
+   - `NEXT_PUBLIC_SUPABASE_URL` — Project URL from Supabase → Project Settings → API  
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` — **anon** / **publishable** public key (not the service role)  
+   - `SUPABASE_SERVICE_ROLE_KEY` — **service_role** secret (server only)  
+   - `NEXT_PUBLIC_APP_URL` — `https://www.mrglowrenewables.in` (no trailing slash)
+
+3. **Redeploy**. `NEXT_PUBLIC_*` is baked in at **build** time. Saving vars without a new deploy leaves login broken.
+4. Supabase → Authentication → URL configuration: Site URL `https://www.mrglowrenewables.in`, plus that origin in Redirect URLs.
+
+Never put `SUPABASE_SERVICE_ROLE_KEY` in a `NEXT_PUBLIC_*` name.
+
 ## Vercel cannot talk to Supabase
 
 Copy all env vars to Production and Preview. `NEXT_PUBLIC_APP_URL` must be the public https origin.

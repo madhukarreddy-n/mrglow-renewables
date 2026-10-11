@@ -8,7 +8,7 @@ Human setup, env vars, and Windows/`npm.cmd` notes: `README.md`. Data model: `do
 
 - Legal name (company entity in copy, footer, terms, schema `legalName`): **Mr.GLOW RENEWABLES PVT LTD**
 - Brand short (`brandName`, titles, everyday “Mr.GLOW”): **Mr.GLOW RENEWABLES**
-- Wordmark: `BrandWordmark` / `GlowO` in `src/components/site/logo.tsx` — GLOW one colour; O is the same letter size as G/L/W; orange bolt **cuts through** the O at forward ~45°. Full lockup art: `public/brand/logo-lockup.jpg`
+- Brand artwork: header uses `public/brand/Logo.png` and `public/brand/Title.png`; full lockup uses `public/brand/Logo & Title.png`.
 - Identity fields are locked in `src/lib/brand.ts`. Contact is not an Admin CMS field.
 - Verified public contact only: email `mrglowrenewables@gmail.com`, site `www.mrglowrenewables.in`, location **Hyderabad** (no street address), phone/WhatsApp `9912343142`.
 - Do **not** invent awards, OEM partnerships, project counts, testimonials, or statistics.

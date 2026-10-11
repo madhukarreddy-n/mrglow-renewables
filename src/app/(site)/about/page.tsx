@@ -34,7 +34,13 @@ export default function Page() {
             </ul>
           </div>
           <div className="overflow-hidden rounded-xl bg-white p-4 ring-1 ring-navy/10">
-            <Image src="/brand/logo-lockup.jpg" alt={BRAND.legalName} width={400} height={500} className="h-auto w-full" />
+            <Image
+              src="/brand/Logo & Title.png"
+              alt={`${BRAND.legalName} — Powering a Greener Tomorrow`}
+              width={1799}
+              height={1821}
+              className="h-auto w-full"
+            />
             <p className="mt-4 text-sm text-muted">{BRAND.location} · {BRAND.phone} · {BRAND.email}</p>
             <Link href="/why-mrglow" className="btn-outline mt-6 inline-flex">
               Why Mr.GLOW
